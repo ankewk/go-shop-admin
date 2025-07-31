@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Angular开发服务器
+  # Angular前端服务（开发环境）
   go-shop-admin-dev:
     build:
       context: .
@@ -20,66 +20,6 @@ services:
     restart: unless-stopped
     command: ["npm", "run", "start:dev"]
 
-  # Go后端API服务（开发模式）
-  go-shop-api-dev:
-    build:
-      context: ../go-shop-api
-      dockerfile: Dockerfile
-    container_name: go-shop-api-dev
-    ports:
-      - "8080:8080"
-    environment:
-      - GIN_MODE=debug
-      - DB_HOST=mysql-dev
-      - DB_PORT=3306
-      - DB_NAME=go_shop_dev
-      - DB_USER=root
-      - DB_PASSWORD=dev123456
-      - REDIS_HOST=redis-dev
-      - REDIS_PORT=6379
-    depends_on:
-      - mysql-dev
-      - redis-dev
-    networks:
-      - go-shop-network-dev
-    volumes:
-      - ../go-shop-api:/app
-    restart: unless-stopped
-
-  # MySQL开发数据库
-  mysql-dev:
-    image: mysql:8.0
-    container_name: go-shop-mysql-dev
-    ports:
-      - "3308:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=dev123456
-      - MYSQL_DATABASE=go_shop_dev
-      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
-      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
-    networks:
-      - go-shop-network-dev
-    volumes:
-      - mysql_dev_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    restart: unless-stopped
-
-  # Redis开发缓存
-  redis-dev:
-    image: redis:7-alpine
-    container_name: go-shop-redis-dev
-    ports:
-      - "6380:6379"
-    networks:
-      - go-shop-network-dev
-    volumes:
-      - redis_dev_data:/data
-    restart: unless-stopped
-
 networks:
   go-shop-network-dev:
-    driver: bridge
-
-volumes:
-  mysql_dev_data:
-  redis_dev_data: 
+    driver: bridge 

@@ -1,75 +1,88 @@
 @echo off
-chcp 65001
+chcp 65001 >nul
+setlocal enabledelayedexpansion
 
-REM 默认环境为生产环境
-set ENV=%1
-if "%ENV%"=="" set ENV=prod
+echo ========================================
+echo Go Shop Admin 启动脚本
+echo ========================================
 
-echo 启动Go Shop Admin后台管理系统 - %ENV% 环境...
-
-REM 检查Docker是否安装
-docker --version >nul 2>&1
-if errorlevel 1 (
-    echo 错误: Docker未安装，请先安装Docker Desktop
-    pause
-    exit /b 1
-)
-
-REM 检查Docker Compose是否安装
-docker-compose --version >nul 2>&1
-if errorlevel 1 (
-    echo 错误: Docker Compose未安装，请确保Docker Desktop包含Compose
-    pause
-    exit /b 1
-)
-
-REM 根据环境选择compose文件
-if "%ENV%"=="dev" (
-    set COMPOSE_FILE=docker-compose.dev.yml
-    set PORT=4200
-    set API_PORT=8080
-    set DB_PORT=3307
-) else if "%ENV%"=="uat" (
-    set COMPOSE_FILE=docker-compose.uat.yml
-    set PORT=4201
-    set API_PORT=8081
-    set DB_PORT=3308
-) else if "%ENV%"=="prod" (
-    set COMPOSE_FILE=docker-compose.prod.yml
-    set PORT=4200
-    set API_PORT=8080
-    set DB_PORT=3306
-) else (
-    echo 错误: 不支持的环境 '%ENV%'
-    echo 支持的环境: dev, uat, prod
-    echo 用法: %0 [dev^|uat^|prod]
-    pause
-    exit /b 1
-)
-
-REM 停止现有容器
-echo 停止现有容器...
-docker-compose -f %COMPOSE_FILE% down
-
-REM 构建并启动服务
-echo 构建并启动 %ENV% 环境服务...
-docker-compose -f %COMPOSE_FILE% up --build -d
-
-REM 等待服务启动
-echo 等待服务启动...
-timeout /t 15 /nobreak >nul
-
-REM 显示服务状态
-echo 服务状态:
-docker-compose -f %COMPOSE_FILE% ps
-
+:menu
 echo.
-echo ✅ %ENV% 环境启动完成！
-echo 🌐 前端访问地址: http://localhost:%PORT%
-echo 🔧 后端API地址: http://localhost:%API_PORT%
-echo 📊 API文档地址: http://localhost:%API_PORT%/swagger/index.html
-echo 💾 数据库端口: %DB_PORT%
+echo 请选择启动方式:
+echo 1. 本地启动 (开发环境)
+echo 2. 本地启动 (UAT环境)
+echo 3. 本地启动 (生产环境)
+echo 4. Docker启动 (开发环境)
+echo 5. Docker启动 (UAT环境)
+echo 6. Docker启动 (生产环境)
+echo 7. 退出
 echo.
-echo 📝 查看日志: docker-compose -f %COMPOSE_FILE% logs -f
-echo 🛑 停止服务: docker-compose -f %COMPOSE_FILE% down
+set /p choice=请输入选择 (1-7): 
+
+if "%choice%"=="1" goto local-dev
+if "%choice%"=="2" goto local-uat
+if "%choice%"=="3" goto local-prod
+if "%choice%"=="4" goto docker-dev
+if "%choice%"=="5" goto docker-uat
+if "%choice%"=="6" goto docker-prod
+if "%choice%"=="7" goto exit
+goto menu
+
+:local-dev
+echo.
+echo 启动本地开发环境...
+npm run start:dev
+goto end
+
+:local-uat
+echo.
+echo 启动本地UAT环境...
+npm run start:uat
+goto end
+
+:local-prod
+echo.
+echo 启动本地生产环境...
+npm run start:prod
+goto end
+
+:docker-dev
+echo.
+echo 启动Docker开发环境...
+docker-compose -f docker-compose.dev.yml up --build -d
+echo.
+echo Docker开发环境启动完成！
+echo 访问地址: http://localhost:4200
+echo 查看日志: docker-compose -f docker-compose.dev.yml logs -f
+echo 停止服务: docker-compose -f docker-compose.dev.yml down
+goto end
+
+:docker-uat
+echo.
+echo 启动Docker UAT环境...
+docker-compose -f docker-compose.uat.yml up --build -d
+echo.
+echo Docker UAT环境启动完成！
+echo 访问地址: http://localhost:4201
+echo 查看日志: docker-compose -f docker-compose.uat.yml logs -f
+echo 停止服务: docker-compose -f docker-compose.uat.yml down
+goto end
+
+:docker-prod
+echo.
+echo 启动Docker生产环境...
+docker-compose -f docker-compose.prod.yml up --build -d
+echo.
+echo Docker生产环境启动完成！
+echo 访问地址: http://localhost:4202
+echo 查看日志: docker-compose -f docker-compose.prod.yml logs -f
+echo 停止服务: docker-compose -f docker-compose.prod.yml down
+goto end
+
+:exit
+echo.
+echo 退出启动脚本
+goto end
+
+:end
 pause 

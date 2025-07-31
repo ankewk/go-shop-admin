@@ -1,81 +1,21 @@
 version: '3.8'
 
 services:
-  # Angular生产前端服务
+  # Angular前端服务（生产环境）
   go-shop-admin-prod:
     build:
       context: .
       dockerfile: Dockerfile.prod
     container_name: go-shop-admin-prod
     ports:
-      - "4200:80"
+      - "4202:80"
     environment:
       - NODE_ENV=production
       - ANGULAR_ENV=production
-    depends_on:
-      - go-shop-api-prod
     networks:
       - go-shop-network-prod
-    restart: unless-stopped
-
-  # Go后端API服务（生产模式）
-  go-shop-api-prod:
-    build:
-      context: ../go-shop-api
-      dockerfile: Dockerfile
-    container_name: go-shop-api-prod
-    ports:
-      - "8080:8080"
-    environment:
-      - GIN_MODE=release
-      - DB_HOST=mysql-prod
-      - DB_PORT=3306
-      - DB_NAME=go_shop
-      - DB_USER=root
-      - DB_PASSWORD=prod@Secure123
-      - REDIS_HOST=redis-prod
-      - REDIS_PORT=6379
-    depends_on:
-      - mysql-prod
-      - redis-prod
-    networks:
-      - go-shop-network-prod
-    restart: unless-stopped
-
-  # MySQL生产数据库
-  mysql-prod:
-    image: mysql:8.0
-    container_name: go-shop-mysql-prod
-    ports:
-      - "3308:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=prod@Secure123
-      - MYSQL_DATABASE=go_shop
-      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
-      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
-    networks:
-      - go-shop-network-prod
-    volumes:
-      - mysql_prod_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    restart: unless-stopped
-
-  # Redis生产缓存
-  redis-prod:
-    image: redis:7-alpine
-    container_name: go-shop-redis-prod
-    ports:
-      - "6379:6379"
-    networks:
-      - go-shop-network-prod
-    volumes:
-      - redis_prod_data:/data
     restart: unless-stopped
 
 networks:
   go-shop-network-prod:
-    driver: bridge
-
-volumes:
-  mysql_prod_data:
-  redis_prod_data: 
+    driver: bridge 

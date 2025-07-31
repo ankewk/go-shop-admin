@@ -75,103 +75,100 @@ go-shop-admin/
 
 ## 🚀 快速开始
 
-### 方式一：Docker Compose 启动（推荐）
+### 方式一：本地启动（推荐开发使用）
 
 #### 前提条件
-- 安装 Docker 和 Docker Compose
-- 确保相关端口未被占用（见下方端口说明）
+- 安装 Node.js 18+ 和 npm
+- 确保相关端口未被占用
 
-#### 多环境支持
+#### 启动命令
 
-项目支持三个环境：
-
-- **DEV（开发环境）**: 用于日常开发，支持热重载
-- **UAT（用户验收测试环境）**: 用于测试验证
-- **PROD（生产环境）**: 用于正式部署
-
-#### 统一启动脚本
-
-**Linux/Mac:**
+**开发环境:**
 ```bash
-# 给脚本执行权限
-chmod +x *.sh
-
-# 启动开发环境（默认）
-./start.sh dev
-
-# 启动UAT环境
-./start.sh uat
-
-# 启动生产环境
-./start.sh prod
-
-# 或使用专用脚本
-./start-dev.sh      # 开发环境
-./start-uat.sh      # UAT环境
-./start-prod.sh     # 生产环境
+npm run start:dev
 ```
+
+**UAT环境:**
+```bash
+npm run start:uat
+```
+
+**生产环境:**
+```bash
+npm run start:prod
+```
+
+#### 使用启动脚本
 
 **Windows:**
 ```batch
-# 启动指定环境
-start.bat dev       # 开发环境
-start.bat uat       # UAT环境
-start.bat prod      # 生产环境
-
-# 或使用专用脚本
-start-dev.bat       # 开发环境
-start-uat.bat       # UAT环境
-start-prod.bat      # 生产环境
+start.bat
 ```
 
-#### 手动启动命令
+**Linux/Mac:**
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+### 方式二：Docker 启动（推荐生产部署）
+
+#### 前提条件
+- 安装 Docker 和 Docker Compose
+- 确保相关端口未被占用
+
+#### 启动命令
 
 **开发环境:**
 ```bash
 docker-compose -f docker-compose.dev.yml up --build -d
-docker-compose -f docker-compose.dev.yml logs -f
-docker-compose -f docker-compose.dev.yml down
 ```
 
 **UAT环境:**
 ```bash
 docker-compose -f docker-compose.uat.yml up --build -d
-docker-compose -f docker-compose.uat.yml logs -f
-docker-compose -f docker-compose.uat.yml down
 ```
 
 **生产环境:**
 ```bash
 docker-compose -f docker-compose.prod.yml up --build -d
-docker-compose -f docker-compose.prod.yml logs -f
-docker-compose -f docker-compose.prod.yml down
 ```
 
-### 方式二：本地开发启动
-
+#### 查看日志
 ```bash
-# 安装依赖
-npm install
+# 开发环境日志
+docker-compose -f docker-compose.dev.yml logs -f
 
-# 启动开发服务器
-npm start
+# UAT环境日志
+docker-compose -f docker-compose.uat.yml logs -f
 
-# 构建生产版本
-npm run build
+# 生产环境日志
+docker-compose -f docker-compose.prod.yml logs -f
+```
+
+#### 停止服务
+```bash
+# 停止开发环境
+docker-compose -f docker-compose.dev.yml down
+
+# 停止UAT环境
+docker-compose -f docker-compose.uat.yml down
+
+# 停止生产环境
+docker-compose -f docker-compose.prod.yml down
 ```
 
 ## 🌐 访问地址
 
-### 生产环境
-- **前端管理系统**: http://localhost:4200
-- **后端 API**: http://localhost:8080
-- **API 文档**: http://localhost:8080/swagger/index.html
-- **数据库**: localhost:3306
+### 本地启动
+- **开发环境**: http://localhost:4200
+- **UAT环境**: http://localhost:4200
+- **生产环境**: http://localhost:4200
 
-### 开发环境
-- **前端开发服务器**: http://localhost:4200
-- **后端 API**: http://localhost:8080
-- **开发数据库**: localhost:3307
+### Docker启动
+- **开发环境**: http://localhost:4200
+- **UAT环境**: http://localhost:4201
+- **生产环境**: http://localhost:4202
 
 ## 💾 数据库信息
 

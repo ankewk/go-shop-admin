@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Angular UAT前端服务
+  # Angular前端服务（UAT环境）
   go-shop-admin-uat:
     build:
       context: .
@@ -12,70 +12,10 @@ services:
     environment:
       - NODE_ENV=uat
       - ANGULAR_ENV=uat
-    depends_on:
-      - go-shop-api-uat
     networks:
       - go-shop-network-uat
-    restart: unless-stopped
-
-  # Go后端API服务（UAT模式）
-  go-shop-api-uat:
-    build:
-      context: ../go-shop-api
-      dockerfile: Dockerfile
-    container_name: go-shop-api-uat
-    ports:
-      - "8081:8080"
-    environment:
-      - GIN_MODE=release
-      - DB_HOST=mysql-uat
-      - DB_PORT=3306
-      - DB_NAME=go_shop_uat
-      - DB_USER=root
-      - DB_PASSWORD=uat123456
-      - REDIS_HOST=redis-uat
-      - REDIS_PORT=6379
-    depends_on:
-      - mysql-uat
-      - redis-uat
-    networks:
-      - go-shop-network-uat
-    restart: unless-stopped
-
-  # MySQL UAT数据库
-  mysql-uat:
-    image: mysql:8.0
-    container_name: go-shop-mysql-uat
-    ports:
-      - "3308:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=uat123456
-      - MYSQL_DATABASE=go_shop_uat
-      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
-      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
-    networks:
-      - go-shop-network-uat
-    volumes:
-      - mysql_uat_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    restart: unless-stopped
-
-  # Redis UAT缓存
-  redis-uat:
-    image: redis:7-alpine
-    container_name: go-shop-redis-uat
-    ports:
-      - "6381:6379"
-    networks:
-      - go-shop-network-uat
-    volumes:
-      - redis_uat_data:/data
     restart: unless-stopped
 
 networks:
   go-shop-network-uat:
-    driver: bridge
-
-volumes:
-  mysql_uat_data:
-  redis_uat_data: 
+    driver: bridge 

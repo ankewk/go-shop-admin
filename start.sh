@@ -1,72 +1,123 @@
 #!/bin/bash
 
-# 默认环境为生产环境
-ENV=${1:-prod}
-
-echo "启动Go Shop Admin后台管理系统 - $ENV 环境..."
+echo "========================================"
+echo "Go Shop Admin 启动脚本"
+echo "========================================"
 
 # 检查Docker是否安装
-if ! command -v docker &> /dev/null; then
-    echo "错误: Docker未安装，请先安装Docker"
-    exit 1
-fi
+check_docker() {
+    if ! command -v docker &> /dev/null; then
+        echo "警告: Docker未安装，Docker启动选项将不可用"
+        return 1
+    fi
+    if ! command -v docker-compose &> /dev/null; then
+        echo "警告: Docker Compose未安装，Docker启动选项将不可用"
+        return 1
+    fi
+    return 0
+}
 
-# 检查Docker Compose是否安装
-if ! command -v docker-compose &> /dev/null; then
-    echo "错误: Docker Compose未安装，请先安装Docker Compose"
-    exit 1
-fi
+# 显示菜单
+show_menu() {
+    echo ""
+    echo "请选择启动方式:"
+    echo "1. 本地启动 (开发环境)"
+    echo "2. 本地启动 (UAT环境)"
+    echo "3. 本地启动 (生产环境)"
+    if check_docker; then
+        echo "4. Docker启动 (开发环境)"
+        echo "5. Docker启动 (UAT环境)"
+        echo "6. Docker启动 (生产环境)"
+        echo "7. 退出"
+    else
+        echo "4. 退出"
+    fi
+    echo ""
+}
 
-# 根据环境选择compose文件
-case $ENV in
-    "dev")
-        COMPOSE_FILE="docker-compose.dev.yml"
-        PORT="4200"
-        API_PORT="8080"
-        DB_PORT="3308"
-        ;;
-    "uat")
-        COMPOSE_FILE="docker-compose.uat.yml"
-        PORT="4201"
-        API_PORT="8081"
-        DB_PORT="3308"
-        ;;
-    "prod")
-        COMPOSE_FILE="docker-compose.prod.yml"
-        PORT="4200"
-        API_PORT="8080"
-        DB_PORT="3308"
-        ;;
-    *)
-        echo "错误: 不支持的环境 '$ENV'"
-        echo "支持的环境: dev, uat, prod"
-        echo "用法: $0 [dev|uat|prod]"
-        exit 1
-        ;;
-esac
+# 本地启动函数
+local_start() {
+    local env=$1
+    echo ""
+    echo "启动本地${env}环境..."
+    npm run start:${env}
+}
 
-# 停止现有容器
-echo "停止现有容器..."
-docker-compose -f $COMPOSE_FILE down
+# Docker启动函数
+docker_start() {
+    local compose_file=$1
+    local service=$2
+    local port=$3
+    echo ""
+    echo "启动Docker ${service}环境..."
+    docker-compose -f ${compose_file} up --build -d
+    echo ""
+    echo "✅ Docker ${service}环境启动完成！"
+    echo "🌐 访问地址: http://localhost:${port}"
+    echo "📝 查看日志: docker-compose -f ${compose_file} logs -f"
+    echo "🛑 停止服务: docker-compose -f ${compose_file} down"
+}
 
-# 构建并启动服务
-echo "构建并启动 $ENV 环境服务..."
-docker-compose -f $COMPOSE_FILE up --build -d
-
-# 等待服务启动
-echo "等待服务启动..."
-sleep 15
-
-# 显示服务状态
-echo "服务状态:"
-docker-compose -f $COMPOSE_FILE ps
-
-echo ""
-echo "✅ $ENV 环境启动完成！"
-echo "🌐 前端访问地址: http://localhost:$PORT"
-echo "🔧 后端API地址: http://localhost:$API_PORT"
-echo "📊 API文档地址: http://localhost:$API_PORT/swagger/index.html"
-echo "💾 数据库端口: $DB_PORT"
-echo ""
-echo "📝 查看日志: docker-compose -f $COMPOSE_FILE logs -f"
-echo "🛑 停止服务: docker-compose -f $COMPOSE_FILE down" 
+# 主循环
+while true; do
+    show_menu
+    
+    if check_docker; then
+        read -p "请输入选择 (1-7): " choice
+    else
+        read -p "请输入选择 (1-4): " choice
+    fi
+    
+    case $choice in
+        1)
+            local_start "dev"
+            break
+            ;;
+        2)
+            local_start "uat"
+            break
+            ;;
+        3)
+            local_start "prod"
+            break
+            ;;
+        4)
+            if check_docker; then
+                docker_start "docker-compose.dev.yml" "go-shop-admin-dev" "4200"
+            else
+                echo "退出启动脚本"
+                exit 0
+            fi
+            break
+            ;;
+        5)
+            if check_docker; then
+                docker_start "docker-compose.uat.yml" "go-shop-admin-uat" "4201"
+            else
+                echo "退出启动脚本"
+                exit 0
+            fi
+            break
+            ;;
+        6)
+            if check_docker; then
+                docker_start "docker-compose.prod.yml" "go-shop-admin-prod" "4202"
+            else
+                echo "退出启动脚本"
+                exit 0
+            fi
+            break
+            ;;
+        7)
+            if check_docker; then
+                echo "退出启动脚本"
+                exit 0
+            else
+                echo "无效选择，请重新输入"
+            fi
+            ;;
+        *)
+            echo "无效选择，请重新输入"
+            ;;
+    esac
+done 
