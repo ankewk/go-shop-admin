@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  # Angular前端服务（开发环境）
+  go-shop-admin-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: go-shop-admin-dev
+    ports:
+      - "4200:4200"
+    environment:
+      - NODE_ENV=development
+      - ANGULAR_ENV=development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - go-shop-network-dev
+    restart: unless-stopped
+    command: ["npm", "run", "start:dev"]
+
+networks:
+  go-shop-network-dev:
+    driver: bridge 

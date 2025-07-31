@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  # Angular前端服务（UAT环境）
+  go-shop-admin-uat:
+    build:
+      context: .
+      dockerfile: Dockerfile.uat
+    container_name: go-shop-admin-uat
+    ports:
+      - "4201:80"
+    environment:
+      - NODE_ENV=uat
+      - ANGULAR_ENV=uat
+    networks:
+      - go-shop-network-uat
+    restart: unless-stopped
+
+networks:
+  go-shop-network-uat:
+    driver: bridge 
